@@ -1,0 +1,136 @@
+﻿@{
+    Layout = null;
+}
+@using Itcast.CMS.Model
+@using Itcast.CMS.Common
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>新聞列表管理</title>
+    <link href="~/Content/tableStyle.css" rel="stylesheet" />
+    <link href="~/Content/pageBar.css" rel="stylesheet" />
+    <link href="~/Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/themes/color.css" rel="stylesheet" />
+    <link href="~/Content/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.easyui.min.js"></script>
+    <script src="~/Scripts/easyui-lang-zh_TW.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //隱藏顯示詳細資料
+            $("#detailDIV").css("display", "none");
+            $(".details").click(function () {
+                showDetail($(this).attr("ids"));
+            });
+            $(".deletes").click(function () {
+                deleteInfo($(this).attr("ids"), $(this));
+            });
+        });
+
+        //顯示詳細資料
+        function showDetail(id) {
+            $.post("/AdminNewList/GetNewsInfoModel", { "ids": id }, function (data) {
+                $("#title").text(data.Title);
+                $("#author").text(data.Author);
+                $("#subDateTime").text(ChangeDateFormat(data.SubDateTime));
+                $("#msg").text(data.Msg);
+            });
+            $("#detailDIV").dialog({
+                modal: true,
+                resizable: true,
+                maximizable: true,
+                collapsible: true,
+                title: "新聞詳細",
+                width: 400,
+                height: 300,
+                buttons: [
+                    {
+                        text: "確定",
+                        iconCls: "icon-ok",
+                        handler: function () {
+                            alert("OK");
+                        }
+                    },
+                    {
+                        text: "取消",
+                        iconCls: "icon-cancel",
+                        handler: function () {
+                            $("#detailDIV").dialog("close");
+                        }
+                    }
+                ]
+            });
+            $("#detailDIV").css("display", "block");
+        }
+
+        //將序列化成json格式後日期(毫秒數)轉成日期格式
+        function ChangeDateFormat(cellval) {
+            var date = new Date(parseInt(cellval.replace("/Date(", "").replace(")/", ""), 10));
+            var month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+            var currentDate = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+            return date.getFullYear() + "-" + month + "-" + currentDate;
+        }
+
+        function deleteInfo(id, control) {
+            $.messager.confirm('刪除新聞', '確定要刪除這筆新聞嗎？', function (r) {
+                if (r) {
+                    $.post("/AdminNewList/DeleteNewsInfo", { "id": id }, function (data) {
+                        if (data == "ok") {
+                            $(control).parent().parent().remove();  //刪除清單畫面中的記錄
+                            $.messager.show({
+                                title: "提示",
+                                msg: "成功刪除一筆新聞！",
+                                showType: "show"
+                            });
+                        }
+                        else {
+                            $.messager.alert("提示", "刪除失敗！", "info");
+                        }
+                    });
+                }
+            });
+
+        }
+    </script>
+</head>
+<body>
+    @if (ViewData["list"] != null)
+    {
+        List<NewsInfo> list = (List<NewsInfo>)ViewData["list"];
+        <table width="100%">
+            <tr><th>編號</th><th>標題</th><th>作者</th><th>時間</th><th>詳細</th><th>刪除</th></tr>
+            @foreach (NewsInfo newsInfo in list)
+            {
+                <tr>
+                    <td>@newsInfo.Id</td>
+                    <td>@newsInfo.Title</td>
+                    <td>@newsInfo.Author</td>
+                    <td>@newsInfo.SubDateTime</td>
+                    <td><a href="javascript:void(0);" class="details" ids="@newsInfo.Id">詳細</a></td>
+                    <td><a href="javascript:void(0);" class="deletes" ids="@newsInfo.Id">刪除</a></td>
+                </tr>
+            }
+        </table>
+        <p class="page_nav">
+            @MvcHtmlString.Create(PageBar.GetPageBar((int)ViewData["pageIndex"], (int)ViewData["pageCount"]))
+        </p>
+    }
+    else
+    {
+        <span>查無資料！</span>
+    }
+    <!--------------- 顯示詳細資料 --------------->
+    <div id="detailDIV">
+        <table width="100%">
+            <tr><td>標題</td><td><span id="title"></span></td></tr>
+            <tr><td>作者</td><td><span id="author"></span></td></tr>
+            <tr><td>時間</td><td><span id="subDateTime"></span></td></tr>
+            <tr><td>內容</td><td><span id="msg"></span></td></tr>
+        </table>
+    </div>
+    <!--------------- 顯示詳細資料 end --------------->
+</body>
+</html>

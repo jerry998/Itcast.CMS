@@ -1,0 +1,83 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Home</title>
+    <link href="~/Content/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/themes/color.css" rel="stylesheet" />
+    <link href="~/Content/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.easyui.min.js"></script>
+    <script src="~/Scripts/easyui-lang-zh_TW.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            btnClickEvent();
+        });
+
+        function btnClickEvent() {
+            var index = 0;
+            $(".detailLink").click(function () {
+                var title = $(this).text();
+                var url = $(this).attr("url");
+                if ($("#tt").tabs("exists", title)) {
+                    //頁籤已經存在，顯示被選中的頁籤
+                    $("#tt").tabs("select", title);
+                    return;
+                }
+                //頁籤不存在，新增頁籤
+                $('#tt').tabs('add', {
+                    title: title,
+                    content: showContent(url),
+                    closable: true
+                });
+            });
+        }
+
+        function showContent(url) {
+            var strHtml = '<iframe src="' + url + '" width="100%" height="100%" scrolling="no" frameborder="0"></iframe>';
+            return strHtml;
+        }
+    </script>
+</head>
+<body class="easyui-layout">
+    <!------------- 頂部佈局 ------------->
+	<div data-options="region:'north',border:false" style="height:70px;background:#B3DFDA;background-image:url('/Content/Images/bg3.png');overflow:hidden">
+        <img src="~/Content/Images/logo.gif" />
+	</div>
+    <!------------- 頂部佈局[end] ------------->
+
+    <!------------- 左邊佈局 ------------->
+    <div data-options="region:'west',split:true,title:'功能項'" style="width: 200px; padding: 2px;">
+        <div class="easyui-accordion" style="width: auto; height: auto;">
+            <div title="新聞管理" data-options="iconCls:'icon-ok'" style="overflow: auto; padding: 10px;">
+                <a href="javascript:void(0);" class="detailLink" url="/AdminNewList/Index">新聞管理</a>
+            </div>
+            <div title="評論管理" data-options="iconCls:'icon-ok'" style="padding: 10px;">
+                <a href="javascript:void(0);" class="detailLink" url="/AdminComment/Index">評論管理</a>
+            </div>
+        </div>
+    </div>
+    <!------------- 左邊佈局[end] ------------->
+
+    <!------------- 底部佈局 ------------->
+	<div data-options="region:'south',border:false" style="height:30px;background:#A9FACD;padding:8px;text-align:center;">
+        &copy;版權所有
+	</div>
+    <!------------- 底部佈局[end] ------------->
+
+    <!------------- 中間佈局 ------------->
+	<div data-options="region:'center'">
+        <div id="tt" class="easyui-tabs" fit="true">
+            <div title="公告" data-options="closable:true" style="padding:10px">
+                <iframe src="/AdminNewList/index" width="100%" height="100%" scrolling="no" frameborder="0"></iframe>
+            </div>
+        </div>
+	</div>
+    <!------------- 中間佈局[end] ------------->
+</body>
+</html>
